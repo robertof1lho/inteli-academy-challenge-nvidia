@@ -1,0 +1,102 @@
+scrape_portfolio:
+  description: >
+    **MISSION: EXTRACT REAL STARTUP DATA USING PORTFOLIO COMPANY EXTRACTOR TOOL**
+
+    You are given a portfolio URL: {portfolio_url}
+
+    **MANDATORY PROCESS:**
+    1. **Use the Portfolio Company Extractor tool** to analyze the portfolio page
+    2. **Extract the companies listed in the tool output**
+    3. **Focus on real companies with actual names and information**
+    4. **If the tool returns no companies, investigate why and report**
+
+    **TOOL USAGE:**
+    You MUST use the Portfolio Company Extractor tool like this:
+    ```
+    Portfolio Company Extractor: {portfolio_url}
+    ```
+
+    **WHAT TO EXTRACT FROM TOOL OUTPUT:**
+    - Company names (exactly as found)
+    - Websites (if available)
+    - Descriptions (if provided)
+    - Technology focus areas
+    - Funding stages (if mentioned)
+    - Any other relevant information
+
+    **ANALYSIS REQUIREMENTS:**
+    - The tool will provide detailed analysis of the portfolio page
+    - Focus on the "DETAILED COMPANIES" section
+    - Look for patterns that indicate real vs fake companies
+    - Pay attention to the number of companies found
+
+    **FOR LATAM PORTFOLIO PAGES:**
+    - Companies may have Portuguese/Spanish names
+    - Descriptions might be in local languages
+    - Look for sectors like fintech, healthtech, AI/ML, e-commerce
+
+    **IF NO COMPANIES FOUND:**
+    - Report what the tool analysis showed
+    - Explain possible reasons (page structure, access issues, etc.)
+    - Do not invent companies
+
+  expected_output: >
+    Detailed analysis based on Portfolio Company Extractor tool output.
+    List all real companies found with their information.
+    If no companies found, explain based on tool analysis.
+
+  agent: portfolio_scraping_agent
+
+
+format_startup2json:
+  description: >
+    **CONVERT REAL STARTUP DATA TO STRUCTURED JSON**
+
+    Convert the portfolio extraction results into the required JSON format.
+
+    **CRITICAL VALIDATION:**
+    1. **Only use companies that were actually found by the Portfolio Company Extractor tool**
+    2. **Map the extracted data to the correct JSON structure**
+    3. **Include description field for each startup**
+    4. **Use null for missing information**
+
+    **REQUIRED JSON STRUCTURE:**
+    {
+      "startups": [
+        {
+          "name": "actual company name from extraction",
+          "website": "actual website URL or null",
+          "description": "actual description from page or null",
+          "sector": "inferred sector or null",
+          "year": null,
+          "tech": ["actual tech keywords found"] or null,
+          "funding": "actual funding stage found or null",
+          "investors": ["vc_name from context"] or null,
+          "leadership": null
+        }
+      ]
+    }
+
+    **MAPPING GUIDELINES:**
+    - name: Use exact company name from extraction
+    - website: Use actual URL found or null
+    - description: Use actual description from page (up to 500 chars)
+    - sector: Infer from description/tech (fintech, healthtech, AI, etc.)
+    - tech: Use actual tech keywords found during extraction
+    - funding: Use funding stage if mentioned (seed, series a, etc.)
+    - investors: Include the VC name that owns this portfolio
+
+    **QUALITY CHECKS:**
+    - Reject obvious fake names like "Company A", "Startup Alpha"
+    - Ensure websites are real domains
+    - Keep descriptions meaningful and specific
+    - Map tech keywords to relevant categories
+
+    **IF NO REAL COMPANIES EXTRACTED:**
+    Return: {"startups": []}
+
+  expected_output: >
+    JSON with actual companies extracted from the portfolio page.
+    Each startup should have real name, website, description, and other available data.
+
+  agent: text2json_agent

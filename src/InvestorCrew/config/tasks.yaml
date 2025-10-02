@@ -1,125 +1,137 @@
 discover_investors_raw:
   description: >
-    NVIDIA Inception is a global acceleration platform for AI startups. It supports companies building cutting-edge AI solutions by offering access to technical tools, discounted NVIDIA hardware/software, free training, cloud credits, and exclusive networking with top-tier investors.
+    Find real LATAM investors aligned with NVIDIA Inception thesis focusing on AI/ML, robotics, edge computing.
 
-    Startups in the program typically focus on areas such as AI infrastructure, robotics, medical imaging, edge computing, autonomous systems, machine learning platforms, and next-gen enterprise software.
+    **FOCUS ON THESE VERIFIED LATAM INVESTORS:**
 
-    Therefore, an investor is considered "aligned with the NVIDIA Inception thesis" if they:
+    1. **Kaszek Ventures** (Argentina/Brazil)
+       - Website: https://www.kaszek.com
+       - Focus: LatAm tech, AI, SaaS, Fintech
 
-    - Invest in AI/ML, edge computing, robotics, or vertical AI applications (e.g. healthcare, industry, energy).
-    - Have previously invested in early-stage deep-tech startups or accelerators that support them.
-    - Mention interest in high-performance computing, computer vision, automation, or simulation technologies.
-    - Are part of or collaborate with venture programs that prioritize frontier tech in Latin America.
+    2. **Monashees** (Brazil) 
+       - Website: https://www.monashees.com.br
+       - Focus: Early-stage AI, ML, SaaS, healthcare tech
 
-    Use this definition to guide your investor search and filtering.
+    3. **ALLVP** (Mexico)
+       - Website: https://www.allvp.vc
+       - Focus: AI/ML, digital platforms, healthcare
 
-    Conduct initial research to discover up to 5 investors aligned with the NVIDIA Inception thesis.
+    4. **Valor Capital Group** (Brazil/US)
+       - Website: https://www.valorcapitalgroup.com
+       - Focus: LatAm tech, AI, cross-border
 
-    1. Focus on: VC, CVC, Accelerator, and Angel types.
-    2. Prioritize countries: Brazil (BR), Mexico (MX), Argentina (AR), Chile (CL), Colombia (CO).
-    3. For each investor found, collect the following fields: name, type, website, country, investment focus, and portfolio URL (if available).
-    4. Provide raw information and sources, no need to format strictly.
-    5. Do not make up data. Use only reliable sources (official websites, press, directories, Crunchbase, etc.).
-    6. Provide links or mention where the information was found when possible.
+    5. **SP Ventures** (Brazil)
+       - Website: https://www.spventures.com.br
+       - Focus: Corporate VC, innovation, tech
 
-    Input thesis: "{{ thesis }}"
+    **RULES:**
+    - Research these 5 investors thoroughly
+    - Do NOT add other investors beyond these 5
+    - Do NOT research portfolio URLs yet - next task will handle that
+    - Focus on validating their basic information (name, type, website, country, focus)
+
+    Input thesis: "{thesis}"
 
   expected_output: >
-    A short list (3–5) of relevant investors with raw data describing their profiles, focus, and relevance to the NVIDIA Inception thesis.
-    The format can be in bullet points, markdown or plain text. This is not the final output — another task will handle the formatting.
+    Information about the 5 verified LATAM investors listed above.
+    Include their basic details but do NOT include portfolio URLs yet.
 
   agent: investor_research_agent
 
 
 validate_investors:
   description: >
-    Validate and normalize the list of investors discovered in the previous step.
+    **MISSION: USE REAL WEB SCRAPING TOOLS TO DISCOVER PORTFOLIO PAGES**
 
-    Instructions:
-    1. Check if each investor actually exists and confirm data consistency across sources.
-    2. Verify that the website and portfolio URL are valid absolute URIs (RFC-3986). Resolve redirects if possible. 
-       If the provided portfolio URL is wrong or missing, find the correct URL on the official website and replace it.
-    3. Normalize fields:
-       - Country: ISO-3166-1 alpha-2 code (e.g., BR, MX, AR, CL, CO). Use null if ambiguous.
-       - Type: must be one of ["VC", "CVC", "Accelerator", "Angel"].
-       - Dates (if any appear, e.g. in funding info): ISO-8601 format (YYYY-MM-DD).
-    4. Ensure that the "focus" is a short, clear description of the investor’s thesis or sectors.
-    5. Return only verified and normalized investors. If uncertain, set the field to null.
-    6. Always output a **strict JSON** object with this structure:
-       {
-         "investors": [
-           {
-             "name": string,
-             "type": one of ["VC", "CVC", "Accelerator", "Angel"],
-             "website": string,
-             "hq_country": string,
-             "focus": string,
-             "portfolio_url": string|null
-           }
-         ]
-       }
-    7. If no valid investors remain after validation, return { "investors": [] }.
+    For each of the 5 investors from the previous task, you must use the Web Scraper tool to actually visit their websites and find portfolio pages.
 
-  expected_output: >
-    A JSON object containing only verified and normalized investor records.
-    
-    EXAMPLE:
+    **MANDATORY PROCESS FOR EACH INVESTOR:**
+
+    1. **Use Web Scraper tool** to access their main website
+    2. **Analyze the navigation menu** and footer links returned by the tool
+    3. **Look for portfolio-related links** in the tool output
+    4. **Use Portfolio Validator tool** to test potential portfolio URLs
+    5. **Only include URLs that the Portfolio Validator confirms are valid**
+
+    **STEP-BY-STEP INSTRUCTIONS:**
+
+    For each investor (Kaszek, Monashees, ALLVP, Valor Capital, SP Ventures):
+
+    1. **Run Web Scraper on their main website**:
+       ```
+       Web Scraper: https://www.example.com
+       ```
+
+    2. **Look for portfolio links in the output** - search for:
+       - Portfolio / Portfólio
+       - Companies / Empresas  
+       - Investments / Inversiones
+       - Startups
+       - Our Companies
+
+    3. **Test promising URLs with Portfolio Validator**:
+       ```
+       Portfolio Validator: https://www.example.com/portfolio
+       ```
+
+    4. **Only include URLs marked as ✅ VALID by the Portfolio Validator**
+
+    **CRITICAL RULES:**
+    - You MUST use the Web Scraper tool for each investor website
+    - You MUST use the Portfolio Validator tool to verify any potential portfolio URLs
+    - Only include portfolio_url if Portfolio Validator marks it as ✅ VALID
+    - If no valid portfolio page is found after using the tools, set to null
+    - Do NOT assume URLs work without using the Portfolio Validator
+
+    **OUTPUT FORMAT:**
     {
       "investors": [
         {
-          "name": "Kaszek",
+          "name": "Kaszek Ventures",
           "type": "VC",
-          "website": "https://kaszek.com",
-          "hq_country": "AR",
+          "website": "https://www.kaszek.com",
+          "hq_country": "AR", 
           "focus": "LatAm tech, AI, SaaS, Fintech",
-          "portfolio_url": "https://kaszek.com/portfolio"
+          "portfolio_url": "validated URL or null"
         }
+        // ... other investors
       ]
     }
 
-  agent: investor_research_agent
+  expected_output: >
+    JSON with the 5 investors and their TOOL-VALIDATED portfolio URLs.
+    Every portfolio_url must have been verified with the Portfolio Validator tool.
+
+  agent: investor_validation_agent
   verbose: true
 
 
 format_investors2json:
   description: >
-    Format the output from the previous task into a strictly structured JSON array.
-
-    Requirements:
-    1. You will receive the unstructured output from a research task.
-    2. Extract and normalize the data into exactly this JSON format:
-       {
-         "investors": [
-           {
-             "name": string,
-             "type": one of ["VC", "CVC", "Accelerator", "Angel"],
-             "website": string,
-             "hq_country": ISO 3166-1 alpha-2 country code (e.g., "BR", "MX"),
-             "focus": string (short description),
-             "portfolio_url": string|null
-           }
-         ]
-       }
-    3. Do not include any commentary, markdown, or explanation. Only strict JSON.
-    4. If data is incomplete or missing, use null. Do not invent information.
-    5. If no valid investors found, return: { "investors": [] }
-    6. The final response must be valid and parsable JSON. You are not allowed to output text before or after the JSON object.
-
-  expected_output: >
-    A JSON object with the following fields."
+    Format the validated investor data into the final JSON structure.
     
-    EXAMPLE:
+    **RULES:**
+    1. Use the exact data from the validation task
+    2. Do NOT modify any URLs or information  
+    3. Do NOT add invented portfolio URLs
+    4. Maintain the exact JSON structure
+    5. Return only valid, parseable JSON
+
+    **EXPECTED OUTPUT FORMAT:**
     {
       "investors": [
         {
-          "name": "Kaszek",
-          "type": "VC",
-          "website": "https://kaszek.com",
-          "hq_country": "AR",
-          "focus": "LatAm tech, AI, SaaS, Fintech",
-          "portfolio_url": "https://kaszek.com/portfolio"
+          "name": "string",
+          "type": "VC|CVC|Accelerator|Angel",
+          "website": "string",
+          "hq_country": "string",
+          "focus": "string",
+          "portfolio_url": "string or null"
         }
       ]
     }
+
+  expected_output: >
+    Clean JSON object with the validated investor data.
 
   agent: text2json_agent

@@ -34,7 +34,7 @@ class SheetsCrew:
             ws = self.spreadsheet.worksheet(worksheet_name)
         except gspread.WorksheetNotFound:
             ws = self.spreadsheet.add_worksheet(title=worksheet_name, rows=1000, cols=26)
-            # Adiciona cabeçalho
+            # Adiciona cabeçalho para investidores
             ws.append_row(["name", "type", "website", "hq_country", "focus", "portfolio_url"])
         
         for inv in investors:
@@ -53,16 +53,16 @@ class SheetsCrew:
             ws = self.spreadsheet.worksheet(worksheet_name)
         except gspread.WorksheetNotFound:
             ws = self.spreadsheet.add_worksheet(title=worksheet_name, rows=1000, cols=26)
-            # Adiciona cabeçalho
+            # Adiciona cabeçalho para startups: startup_name, website, description, sector, stage, vc_name
             ws.append_row(["startup_name", "website", "description", "sector", "stage", "vc_name"])
         
         for st in startups:
             row = [
-                st.get("name", ""),
-                st.get("website", ""),
-                st.get("description", ""),  # Você pode mapear de outro campo se necessário
-                st.get("sector", ""),
-                st.get("stage", ""),  # Você pode mapear de funding ou outro campo
-                vc_name
+                st.get("name", ""),                    # startup_name
+                st.get("website", ""),                 # website
+                st.get("description", ""),             # description
+                st.get("sector", ""),                  # sector
+                st.get("stage", st.get("funding", "")), # stage (pode vir como "funding")
+                vc_name                                # vc_name
             ]
             ws.append_row(row, value_input_option="USER_ENTERED")
