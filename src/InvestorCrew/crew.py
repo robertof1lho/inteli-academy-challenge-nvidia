@@ -1,5 +1,5 @@
 import os
-from crewai import Agent, Crew, Process, Task
+from crewai import LLM, Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from typing import List, Optional
 from pydantic import BaseModel
@@ -17,7 +17,11 @@ class Investor(BaseModel):
 class InvestorList(BaseModel):
     investors: List[Investor]
     
-    
+llm = LLM(
+model="perplexity/sonar",
+base_url="https://api.perplexity.ai/",
+api_key=os.getenv("PERPLEXITY_API_KEY")
+)
 
 @CrewBase
 class InvestorCrew():
@@ -34,14 +38,14 @@ class InvestorCrew():
             reasoning=True,
             max_reasoning_attempts=2,
             memory=True,
-            llm='openai/nvidia/llama-3.3-nemotron-super-49b-v1'
+            llm=llm
         )
 
     @agent
     def investor_validation_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['investor_validation_agent'],
-            tools=[ScrapeWebsiteTool()]
+            llm=llm
         )
 
     @agent

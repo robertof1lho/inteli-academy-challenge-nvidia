@@ -30,3 +30,59 @@ scrape_portfolio:
     }
 
   agent: portfolio_scraping_agent
+
+
+format_startup2json:
+  description: >
+    Convert raw or unstructured startup information into a strictly structured JSON.
+
+    Requirements:
+    1. You will receive the unstructured output from a research or scraping task.
+    2. Extract and normalize the data into exactly this JSON format:
+       {
+         "startups": [
+           {
+             "name": string,
+             "website": string|null,
+             "sector": string|null,
+             "year": int|null,
+             "tech": [string]|null,
+             "funding": string|null,
+             "investors": [string]|null,
+             "leadership": [
+               { "role": string, "name": string, "linkedin": string|null }
+             ]|null
+           }
+         ]
+       }
+    3. Do not include any commentary, markdown, or explanation. Only strict JSON.
+    4. If data is incomplete or missing, use null. Do not invent information.
+    5. If no valid startup found, return: { "startups": [] }
+    6. The final response must be valid and parsable JSON. Do not output text before or after the JSON object.
+
+  expected_output: >
+    A JSON object with the following fields.
+
+    EXAMPLE:
+    {
+      "startups": [
+        {
+          "name": "NotCo",
+          "website": "https://www.notco.com",
+          "sector": "Foodtech",
+          "year": 2015,
+          "tech": ["AI", "Computer Vision"],
+          "funding": "Series D",
+          "investors": ["Tiger Global", "Kaszek"],
+          "leadership": [
+            {
+              "role": "CTO",
+              "name": "Karim Pichara",
+              "linkedin": "https://linkedin.com/in/karimpichara"
+            }
+          ]
+        }
+      ]
+    }
+
+  agent: text2json_agent

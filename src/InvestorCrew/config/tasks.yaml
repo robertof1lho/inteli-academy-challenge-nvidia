@@ -33,22 +33,52 @@ discover_investors_raw:
 
 validate_investors:
   description: >
-    Valide se os websites dos investidores encontrados estão acessíveis e corretos.
-    Verifique se a URL de portfólio leva a uma página com startups visíveis ou listadas.
+    Validate and normalize the list of investors discovered in the previous step.
 
-    Para cada investidor, corrija a URL se possível. Remova investidores com sites quebrados ou não confiáveis.
-    Retorne os dados como texto estruturado, um por linha.
+    Instructions:
+    1. Check if each investor actually exists and confirm data consistency across sources.
+    2. Verify that the website and portfolio URL are valid absolute URIs (RFC-3986). Resolve redirects if possible. 
+       If the provided portfolio URL is wrong or missing, find the correct URL on the official website and replace it.
+    3. Normalize fields:
+       - Country: ISO-3166-1 alpha-2 code (e.g., BR, MX, AR, CL, CO). Use null if ambiguous.
+       - Type: must be one of ["VC", "CVC", "Accelerator", "Angel"].
+       - Dates (if any appear, e.g. in funding info): ISO-8601 format (YYYY-MM-DD).
+    4. Ensure that the "focus" is a short, clear description of the investor’s thesis or sectors.
+    5. Return only verified and normalized investors. If uncertain, set the field to null.
+    6. Always output a **strict JSON** object with this structure:
+       {
+         "investors": [
+           {
+             "name": string,
+             "type": one of ["VC", "CVC", "Accelerator", "Angel"],
+             "website": string,
+             "hq_country": string,
+             "focus": string,
+             "portfolio_url": string|null
+           }
+         ]
+       }
+    7. If no valid investors remain after validation, return { "investors": [] }.
 
   expected_output: >
-    Lista de investidores válidos, com campos:
-    - name
-    - type
-    - website
-    - hq_country
-    - focus
-    - portfolio_url
+    A JSON object containing only verified and normalized investor records.
+    
+    EXAMPLE:
+    {
+      "investors": [
+        {
+          "name": "Kaszek",
+          "type": "VC",
+          "website": "https://kaszek.com",
+          "hq_country": "AR",
+          "focus": "LatAm tech, AI, SaaS, Fintech",
+          "portfolio_url": "https://kaszek.com/portfolio"
+        }
+      ]
+    }
 
   agent: investor_research_agent
+  verbose: true
 
 
 format_investors2json:
@@ -76,7 +106,7 @@ format_investors2json:
     6. The final response must be valid and parsable JSON. You are not allowed to output text before or after the JSON object.
 
   expected_output: >
-    A JSON object with 'investors' and 'name', 'type', 'website', 'hq_country', 'focus' and 'portfolio_url' fields."
+    A JSON object with the following fields."
     
     EXAMPLE:
     {
