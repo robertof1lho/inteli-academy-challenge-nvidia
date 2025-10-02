@@ -5,14 +5,11 @@ import os
 from typing import List, Optional
 from pydantic import BaseModel
 
-
-
 llm = LLM(
     model="perplexity/sonar",
     base_url="https://api.perplexity.ai/",
     api_key=os.getenv("PERPLEXITY_API_KEY")
 )
-
 
 class LeadershipPerson(BaseModel):
     role: str
@@ -31,7 +28,6 @@ class StartupCandidate(BaseModel):
 
 class StartupList(BaseModel):
     startups: List[StartupCandidate]
-
 
 @CrewBase
 class ScrapingCrew():
@@ -58,19 +54,19 @@ class ScrapingCrew():
         return Task(
             config=self.tasks_config['scrape_portfolio'],
         )
+    
     @task
     def format_startups_json(self) -> Task:
         return Task(
             config=self.tasks_config['format_startup2json'],
-            output_json=StartupList,
+            output_pydantic=StartupList,  # Mudança: usar output_pydantic em vez de output_json
         )
 
     @crew
     def crew(self) -> Crew:
         return Crew(
-            agents=[self.portfolio_scraping_agent()],
+            agents=[self.portfolio_scraping_agent(), self.text2json_agent()],  # Adicione o segundo agente
             tasks=[self.scrape_portfolio(), self.format_startups_json()],
             process=Process.sequential,
             verbose=True
         )
-

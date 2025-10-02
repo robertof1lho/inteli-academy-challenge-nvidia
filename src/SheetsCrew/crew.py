@@ -1,78 +1,68 @@
 import os
-from crewai import Agent, Crew, Process, Task   
-from crewai.project import CrewBase, agent, crew, task
-
-
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-base_dir = os.path.dirname(__file__)  # pega a pasta do crew.py
-cred_path = os.path.join(base_dir, "config", "credentials.json")
-        
-@CrewBase
-class SheetsCrew():
-    def __init__(self):
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+class SheetsCrew:
+    def __init__(self, spreadsheet_id: str, worksheet_name: str = "Funding Round", credentials_path: str | None = None):
+        base_dir = os.path.dirname(__file__)
+        cred_path = credentials_path or os.path.join(base_dir, "config", "credentials.json")
+
+        scope = [
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/drive",
+            "https://www.googleapis.com/auth/spreadsheets"
+        ]
         creds = ServiceAccountCredentials.from_json_keyfile_name(cred_path, scope)
         self.client = gspread.authorize(creds)
-        self.sheet = self.client.open("inteli academy").worksheet("Investors")
 
-    def save_investors(self, investors):
-        for inv in investors:
-            row = [inv.get("name"), inv.get("website"), inv.get("type"), inv.get("focus")]
-            self.sheet.append_row(row)
+        # Abre a planilha por ID e garante a aba
+        self.spreadsheet = self.client.open_by_key(spreadsheet_id)
+        try:
+            self.sheet = self.spreadsheet.worksheet(worksheet_name)
+        except gspread.WorksheetNotFound:
+            self.sheet = self.spreadsheet.add_worksheet(title=worksheet_name, rows=1000, cols=26)
 
-    def save_startups(self, startups):
-        ws = self.client.open("inteli academy").worksheet("Startups")
-        for st in startups:
-            row = [st.get("name"), st.get("website"), st.get("sector"), st.get("founded_year")]
-            ws.append_row(row)
+    def append_row(self, row: list):
+        self.sheet.append_row(row, value_input_option="USER_ENTERED")
 
+    def append_rows(self, rows: list[list]):
+        for row in rows:
+            self.append_row(row)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # agents: list
-    # tasks: list
-
-    # @agent
-    # def sheets_writer_agent(self) -> Agent:
+    def save_investors(self, investors, worksheet_name: str = "Investors"):
+        try:
+            ws = self.spreadsheet.worksheet(worksheet_name)
+        except gspread.WorksheetNotFound:
+            ws = self.spreadsheet.add_worksheet(title=worksheet_name, rows=1000, cols=26)
+            # Adiciona cabeçalho
+            ws.append_row(["name", "type", "website", "hq_country", "focus", "portfolio_url"])
         
-    #     return Agent(
-    #         config=self.agents_config['sheets_writer_agent'],
-    #         tools=tools
-    #     )
+        for inv in investors:
+            row = [
+                inv.get("name", ""),
+                inv.get("type", ""),
+                inv.get("website", ""),
+                inv.get("hq_country", ""),
+                inv.get("focus", ""),
+                inv.get("portfolio_url", "")
+            ]
+            ws.append_row(row, value_input_option="USER_ENTERED")
 
-    # @task
-    # def write_investors(self) -> Task:
-    #     return Task(config=self.tasks_config['write_investors_to_spreadsheet'])
-
-    # @task
-    # def write_startups(self) -> Task:
-    #     return Task(config=self.tasks_config['write_startups_to_spreadsheet'])
-
-    # @crew
-    # def crew(self) -> Crew:
-    #     return Crew(
-    #         agents=[self.sheets_writer_agent()],
-    #         tasks=[self.write_investors(), self.write_startups()],
-    #         process=Process.sequential,
-    #         verbose=True
-    #     )
+    def save_startups(self, startups, vc_name: str, worksheet_name: str = "Startups"):
+        try:
+            ws = self.spreadsheet.worksheet(worksheet_name)
+        except gspread.WorksheetNotFound:
+            ws = self.spreadsheet.add_worksheet(title=worksheet_name, rows=1000, cols=26)
+            # Adiciona cabeçalho
+            ws.append_row(["startup_name", "website", "description", "sector", "stage", "vc_name"])
+        
+        for st in startups:
+            row = [
+                st.get("name", ""),
+                st.get("website", ""),
+                st.get("description", ""),  # Você pode mapear de outro campo se necessário
+                st.get("sector", ""),
+                st.get("stage", ""),  # Você pode mapear de funding ou outro campo
+                vc_name
+            ]
+            ws.append_row(row, value_input_option="USER_ENTERED")
