@@ -1,6 +1,6 @@
 # Dependências do backend
 crewai
-supabase>=2
+supabase
 requests>=2.32
 tenacity>=8
 apscheduler>=3

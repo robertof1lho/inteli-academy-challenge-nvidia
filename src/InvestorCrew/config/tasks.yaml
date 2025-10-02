@@ -1,0 +1,95 @@
+discover_investors_raw:
+  description: >
+    NVIDIA Inception is a global acceleration platform for AI startups. It supports companies building cutting-edge AI solutions by offering access to technical tools, discounted NVIDIA hardware/software, free training, cloud credits, and exclusive networking with top-tier investors.
+
+    Startups in the program typically focus on areas such as AI infrastructure, robotics, medical imaging, edge computing, autonomous systems, machine learning platforms, and next-gen enterprise software.
+
+    Therefore, an investor is considered "aligned with the NVIDIA Inception thesis" if they:
+
+    - Invest in AI/ML, edge computing, robotics, or vertical AI applications (e.g. healthcare, industry, energy).
+    - Have previously invested in early-stage deep-tech startups or accelerators that support them.
+    - Mention interest in high-performance computing, computer vision, automation, or simulation technologies.
+    - Are part of or collaborate with venture programs that prioritize frontier tech in Latin America.
+
+    Use this definition to guide your investor search and filtering.
+
+    Conduct initial research to discover up to 5 investors aligned with the NVIDIA Inception thesis.
+
+    1. Focus on: VC, CVC, Accelerator, and Angel types.
+    2. Prioritize countries: Brazil (BR), Mexico (MX), Argentina (AR), Chile (CL), Colombia (CO).
+    3. For each investor found, collect the following fields: name, type, website, country, investment focus, and portfolio URL (if available).
+    4. Provide raw information and sources, no need to format strictly.
+    5. Do not make up data. Use only reliable sources (official websites, press, directories, Crunchbase, etc.).
+    6. Provide links or mention where the information was found when possible.
+
+    Input thesis: "{{ thesis }}"
+
+  expected_output: >
+    A short list (3–5) of relevant investors with raw data describing their profiles, focus, and relevance to the NVIDIA Inception thesis.
+    The format can be in bullet points, markdown or plain text. This is not the final output — another task will handle the formatting.
+
+  agent: investor_research_agent
+
+
+validate_investors:
+  description: >
+    Valide se os websites dos investidores encontrados estão acessíveis e corretos.
+    Verifique se a URL de portfólio leva a uma página com startups visíveis ou listadas.
+
+    Para cada investidor, corrija a URL se possível. Remova investidores com sites quebrados ou não confiáveis.
+    Retorne os dados como texto estruturado, um por linha.
+
+  expected_output: >
+    Lista de investidores válidos, com campos:
+    - name
+    - type
+    - website
+    - hq_country
+    - focus
+    - portfolio_url
+
+  agent: investor_research_agent
+
+
+format_investors2json:
+  description: >
+    Format the output from the previous task into a strictly structured JSON array.
+
+    Requirements:
+    1. You will receive the unstructured output from a research task.
+    2. Extract and normalize the data into exactly this JSON format:
+       {
+         "investors": [
+           {
+             "name": string,
+             "type": one of ["VC", "CVC", "Accelerator", "Angel"],
+             "website": string,
+             "hq_country": ISO 3166-1 alpha-2 country code (e.g., "BR", "MX"),
+             "focus": string (short description),
+             "portfolio_url": string|null
+           }
+         ]
+       }
+    3. Do not include any commentary, markdown, or explanation. Only strict JSON.
+    4. If data is incomplete or missing, use null. Do not invent information.
+    5. If no valid investors found, return: { "investors": [] }
+    6. The final response must be valid and parsable JSON. You are not allowed to output text before or after the JSON object.
+
+  expected_output: >
+    A JSON object with 'investors' and 'name', 'type', 'website', 'hq_country', 'focus' and 'portfolio_url' fields."
+    
+    EXAMPLE:
+    {
+      "investors": [
+        {
+          "name": "Kaszek",
+          "type": "VC",
+          "website": "https://kaszek.com",
+          "hq_country": "AR",
+          "focus": "LatAm tech, AI, SaaS, Fintech",
+          "portfolio_url": "https://kaszek.com/portfolio"
+        }
+      ]
+    }
+
+  agent: text2json_agent

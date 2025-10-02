@@ -1,0 +1,33 @@
+write_investors_to_spreadsheet:
+  description: >
+    You will receive a list of validated investors. Each investor includes:
+    - name
+    - type
+    - website
+    - hq_country
+    - focus
+    - portfolio_url
+
+    Your job is to append this data into the 'Investors' sheet of the spreadsheet.
+    Check for duplicates based on investor name + website. Skip duplicates.
+    
+  expected_output: >
+    A summary: how many investors were inserted, skipped, and the final row count in the Investors sheet.
+  agent: sheets_writer_agent
+
+
+write_startups_to_spreadsheet:
+  description: >
+    You will receive a list of startups from investor portfolios. Each includes:
+    - startup_name
+    - website
+    - description
+    - sector
+    - stage
+    - vc_name
+
+    Append each one to the 'Startups' tab in the spreadsheet, avoiding duplicates based on startup_name + vc_name.
+
+  expected_output: >
+    A summary: how many startups were inserted, skipped, and the final row count in the Startups sheet.
+  agent: sheets_writer_agent

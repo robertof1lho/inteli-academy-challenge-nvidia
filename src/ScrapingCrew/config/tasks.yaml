@@ -1,0 +1,32 @@
+scrape_portfolio:
+  description: >
+    Given the portfolio information of a validated investor (including name, website, 
+    and portfolio_url when available), scrape and extract all startups listed in that 
+    portfolio. For each startup found, collect and normalize key details such as: 
+    - name  
+    - website  
+    - sector/industry  
+    - year of foundation  
+    - AI technologies applied (e.g., Computer Vision, NLP, Robotics, Generative AI)  
+    - latest funding round and main investors  
+    - leadership profiles (CTO, Tech Lead, etc., with LinkedIn links if possible).  
+
+  expected_output: >
+    The final output must strictly follow this JSON structure:
+
+    {
+      "startups": [
+        {
+          "name": string,
+          "website": string|null,
+          "sector": string|null,
+          "year": int|null,
+          "tech": [string]|null,
+          "funding": string|null,
+          "investors": [string]|null,
+          "leadership": [ { "role": string, "name": string, "linkedin": string|null } ]|null
+        }
+      ]
+    }
+
+  agent: portfolio_scraping_agent
